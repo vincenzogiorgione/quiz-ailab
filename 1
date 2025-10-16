@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Che artista sei?</title>
+<style>
+body { font-family: sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
+h1 { text-align: center; color: #e91e63; }
+button { margin: 10px 0; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 8px; border: 1px solid #ccc; background: #fff; }
+button:hover { background: #e91e63; color: #fff; }
+input { padding: 8px; font-size: 16px; margin-bottom: 15px; width: 100%; border-radius: 5px; border: 1px solid #ccc; }
+.question { margin-bottom: 20px; }
+#result { text-align: center; margin-top: 30px; font-size: 20px; }
+</style>
+</head>
+<body>
+<h1>🎧 Che artista sei?</h1>
+<div id="quiz"></div>
+<div id="result" style="display:none;"></div>
+
+<script>
+// Lista delle domande
+const domande = [
+  {
+    testo: "Che situazione ti rappresenta meglio?",
+    opzioni: ["Sul palco davanti a tutti", "In studio da solo a creare", "In un club a ballare", "Al bar con amici", "In viaggio verso posti nuovi"]
+  },
+  {
+    testo: "Che strumento useresti per esprimerti?",
+    opzioni: ["Voce", "Chitarra", "Pianoforte", "Computer/DAW", "Batteria"]
+  },
+  {
+    testo: "Quanto ti senti impulsivo nella vita?",
+    opzioni: ["Per niente", "Poco", "Moderatamente", "Molto", "Estremamente"]
+  },
+  {
+    testo: "Se fossi il capo di un gruppo di amici, cosa faresti?",
+    opzioni: ["Organizzerei una serata karaoke", "Pianificherei un tour mondiale", "Creerei una coreografia per ogni occasione", "Scriverei una canzone virale", "Proporrei una jam session improvvisata"]
+  },
+  {
+    testo: "Se potessi trasformare qualsiasi suono in musica, quale sceglieresti?",
+    opzioni: ["Il rumore del traffico", "Il cinguettio degli uccelli", "Il battito del cuore", "Il ticchettio dell’orologio", "Il brusio dei caffè affollati"]
+  },
+  {
+    testo: "Quanti concerti hai sognato di fare nella tua vita?",
+    opzioni: ["1","2","3","4","5"]
+  }
+];
+
+// Lista dei 50+ artisti
+const artisti = [
+"Beyoncé","Dua Lipa","Harry Styles","Lizzo","Taylor Swift","Katy Perry","Sam Smith","Adele","Miley Cyrus","Justin Bieber",
+"Bruce Springsteen","Foo Fighters","Paramore","Arctic Monkeys","Queen","Nirvana","The Killers","U2","Green Day","Rolling Stones",
+"Billie Eilish","Lana Del Rey","Florence Welch","Tame Impala","Phoebe Bridgers","M83","Bon Iver","The 1975","Arlo Parks","Sufjan Stevens",
+"Daft Punk","Björk","The Weeknd","Flume","FKA Twigs","Aphex Twin","ODESZA","Grimes","Fred again..","Skrillex",
+"Amy Winehouse","Erykah Badu","Stevie Wonder","Norah Jones","Michael Bublé","Anderson .Paak","Gregory Porter","Alicia Keys","John Legend","Lianne La Havas",
+"Vasco Rossi","Ligabue","Tiziano Ferro","Eros Ramazzotti","Laura Pausini","Måneskin","Marracash","Fedez","Elisa","Francesca Michielin"
+];
+
+let risposte = [];
+let index = -1; // partiamo da -1 per chiedere prima nome e cognome
+let nomeCognome = "";
+
+function mostraDomanda() {
+  const quizDiv = document.getElementById("quiz");
+  quizDiv.innerHTML = "";
+
+  if(index === -1){
+    // Mostra il campo per nome e cognome
+    const p = document.createElement("p");
+    p.textContent = "Inserisci il tuo nome e cognome:";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "nomeInput";
+    input.placeholder = "Nome e Cognome";
+    const btn = document.createElement("button");
+    btn.textContent = "Inizia il quiz";
+    btn.onclick = () => {
+      const val = document.getElementById("nomeInput").value.trim();
+      if(val !== ""){
+        nomeCognome = val;
+        index++;
+        mostraDomanda();
+      } else {
+        alert("Per favore inserisci nome e cognome!");
+      }
+    }
+    quizDiv.appendChild(p);
+    quizDiv.appendChild(input);
+    quizDiv.appendChild(btn);
+    return;
+  }
+
+  if(index < domande.length) {
+    const q = domande[index];
+    const qDiv = document.createElement("div");
+    qDiv.className = "question";
+    const p = document.createElement("p");
+    p.textContent = q.testo;
+    qDiv.appendChild(p);
+    q.opzioni.forEach(op => {
+      const btn = document.createElement("button");
+      btn.textContent = op;
+      btn.onclick = () => { risposte.push(op); index++; mostraDomanda(); };
+      qDiv.appendChild(btn);
+    });
+    quizDiv.appendChild(qDiv);
+  } else {
+    mostraRisultato();
+  }
+}
+
+function mostraRisultato() {
+  const artista = artisti[Math.floor(Math.random()*artisti.length)];
+  
+  document.getElementById("quiz").style.display = "none";
+  const resultDiv = document.getElementById("result");
+  resultDiv.style.display = "block";
+  resultDiv.innerHTML = `<h2>🎤 ${nomeCognome}, sei ${artista}!</h2><p>Complimenti! Scopri la tua anima musicale 😉</p>`;
+  
+  fetch("INSERISCI_LA_TUA_WEB_APP_URL", {
+    method: "POST",
+    body: JSON.stringify({nome: nomeCognome, email:"", risposte: risposte, artista: artista}),
+    headers: {"Content-Type": "application/json"}
+  });
+}
+
+mostraDomanda();
